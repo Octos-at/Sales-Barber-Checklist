@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.2, maximum-scale=10.0, user-scalable=yes">
+    <title>💈 Friseure Innsbruck – Basisdaten‑Toggle + Cloud</title>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
+        body { margin: 0; padding: 20px; transition: background 0.2s, color 0.2s; }
+        body.light-mode { background: #eef2f5; color: #1a2c3e; }
+        body.dark-mode { background: #121212; color: #e0e0e0; }
+        .app-container {
+            max-width: 1600px; margin: 0 auto; border-radius: 28px; overflow: hidden;
+            transition: background 0.2s;
+        }
+        body.light-mode .app-container { background: white; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.12); }
+        body.dark-mode .app-container { background: #1e1e1e; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5); }
+        .toolbar {
+            padding: 1rem 1.5rem; border-bottom: 1px solid;
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;
+        }
+        body.light-mode .toolbar { background: #ffffff; border-bottom-color: #e2edf2; }
+        body.dark-mode .toolbar { background: #2d2d2d; border-bottom-color: #3a3a3a; }
+        h1 {
+            font-size: 1.5rem; font-weight: 700; margin: 0;
+            background: linear-gradient(135deg, #1F5E3A, #2C8C5A);
+            background-clip: text; -webkit-background-clip: text; color: transparent;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        h1::before { content: "✂️"; font-size: 1.7rem; color: #2C8C5A; }
+        .button-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .action-btn {
+            background: #1F5E3A; border: none; padding: 8px 18px; border-radius: 60px;
+            font-weight: 500; font-size: 0.85rem; cursor: pointer; color: white;
+        }
+        .action-btn:hover { background: #154d2e; }
+        .reset-btn { background: #c0392b; }
+        .reset-btn:hover { background: #a93226; }
+        .toggle-btn {
+            background: #2c3e50; border: none; padding: 8px 18px; border-radius: 60px;
+            font-weight: 500; font-size: 0.85rem; cursor: pointer; color: white;
+        }
+        .toggle-btn.active { background: #27ae60; }
+        .sort-control {
+            display: flex; align-items: center; gap: 12px;
+            background: #f8fafd; padding: 6px 16px; border-radius: 48px;
+        }
+        body.dark-mode .sort-control { background: #3a3a3a; }
+        #sortSelect {
+            padding: 8px 16px; border-radius: 40px; border: 1px solid #cbdde6;
+            background: white; font-weight: 500; font-size: 0.85rem; cursor: pointer;
+        }
+        body.dark-mode #sortSelect { background: #2d2d2d; color: #e0e0e0; border-color: #555; }
+        .stats {
+            background: #eef3f8; padding: 6px 18px; border-radius: 40px;
+            font-size: 0.85rem; font-weight: 500; color: #1f5e3a;
+        }
+        body.dark-mode .stats { background: #2a2a2a; color: #8bc34a; }
+        .stats span { font-weight: 800; background: white; padding: 2px 8px; border-radius: 30px; margin: 0 4px; }
+        body.dark-mode .stats span { background: #444; color: #e0e0e0; }
+        .table-wrapper { overflow-x: auto; overflow-y: auto; max-height: 70vh; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 1200px; }
+        th {
+            padding: 12px 8px; text-align: left; font-weight: 700; border-bottom: 2px solid;
+            position: sticky; top: 0; cursor: pointer; user-select: none;
+        }
+        body.light-mode th { background: #f4f9fe; border-bottom-color: #dce5ec; }
+        body.dark-mode th { background: #2a2a2a; border-bottom-color: #444; }
+        th:hover { opacity: 0.8; }
+        td { padding: 8px; border-bottom: 1px solid; vertical-align: middle; }
+        body.light-mode td { border-bottom-color: #e9edf2; }
+        body.dark-mode td { border-bottom-color: #333; }
+        tr:hover td { background-color: rgba(0,0,0,0.05); }
+        tr.priority-high-row td { background-color: rgba(245, 166, 35, 0.15); }
+
+        /* Eingabefelder */
+        .edit-input, .edit-number {
+            width: 100%; padding: 6px 8px; border-radius: 12px;
+            border: 1px solid #cfdfe9; background: white; font-size: 0.75rem;
+        }
+        body.dark-mode .edit-input, body.dark-mode .edit-number {
+            background: #3a3a3a; color: #e0e0e0; border-color: #555;
+        }
+        .priority-select, .interested-select, .followup-select {
+            padding: 6px 8px; border-radius: 30px; border: 1px solid #cfdfe9;
+            background: white; font-size: 0.75rem; width: 95px;
+        }
+        .priority-select.high { background-color: #ffe0b3; }
+        body.dark-mode .priority-select, body.dark-mode .interested-select, body.dark-mode .followup-select {
+            background: #3a3a3a; color: #e0e0e0; border-color: #555;
+        }
+        .visited-checkbox { width: 20px; height: 20px; accent-color: #2c8c5a; cursor: pointer; }
+        .date-input {
+            padding: 6px 8px; border-radius: 20px; border: 1px solid #cfdfe9;
+            font-size: 0.7rem; width: 120px; background: white;
+        }
+        body.dark-mode .date-input { background: #3a3a3a; color: #e0e0e0; border-color: #555; }
+        .comments-input {
+            padding: 6px 8px; border-radius: 12px; border: 1px solid #cfdfe9;
+            font-size: 0.75rem; width: 140px; background: white;
+        }
+        body.dark-mode .comments-input { background: #3a3a3a; color: #e0e0e0; border-color: #555; }
+        .rating-badge { background: #f5e7d3; padding: 4px 10px; border-radius: 40px; display: inline-block; }
+        .rating-high { background: #d9f0e3; color: #146b3a; }
+        .phone-link { color: #2c6e9e; text-decoration: none; }
+        .empty-value { color: #9aaebf; }
+        footer {
+            padding: 0.8rem 1.5rem; font-size: 0.7rem; text-align: center;
+            border-top: 1px solid;
+        }
+        body.light-mode footer { border-top-color: #e2edf2; }
+        body.dark-mode footer { border-top-color: #333; }
+        .toast-msg {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #1a2c3e; color: white; padding: 6px 18px; border-radius: 40px;
+            font-size: 0.8rem; opacity: 0; transition: 0.2s; pointer-events: none; z-index: 1000;
+        }
+    </style>
+</head>
+<body class="light-mode">
+<div class="app-container">
+    <div class="toolbar">
+        <h1>💈 Friseure Innsbruck</h1>
+        <div class="button-group">
+            <button id="addBtn" class="action-btn">➕ Neu</button>
+            <button id="toggleBaseEditBtn" class="toggle-btn">✏️ Basisdaten editieren (AUS)</button>
+            <button id="darkModeBtn" class="action-btn" style="background:#2c3e50;">🌙 Dark Mode</button>
+            <!-- <button id="resetCloudBtn" class="action-btn reset-btn">🔄 Cloud zurücksetzen</button> -->
+        </div>
+        <div class="sort-control">
+            <label>📋 Sortieren:</label>
+            <select id="sortSelect">
+                <option value="nr">#</option>
+                <option value="name">Name</option>
+                <option value="priority">⭐ Priorität</option>
+                <option value="visited">✅ Besucht</option>
+                <option value="interested">💼 Interessent</option>
+                <option value="followup">📞 Follow‑up</option>
+                <option value="date">📅 Termin</option>
+                <option value="rating">⭐ Bewertung</option>
+                <option value="reviews">🗳️ Bewertet von</option>
+            </select>
+        </div>
+        <div class="stats">📊 <span id="totalCount">0</span> Salons</div>
+    </div>
+    <div class="table-wrapper">
+        <table id="salonTable">
+            <thead>
+                <tr id="tableHeader">
+                    <th data-sort="nr">#</th>
+                    <th data-sort="name">Name</th>
+                    <th data-sort="priority">⭐ Priorität</th>
+                    <th data-sort="visited">✅ Besucht</th>
+                    <th data-sort="interested">💼 Interessent</th>
+                    <th data-sort="followup">⏰ Follow‑up</th>
+                    <th data-sort="date">📅 Termin</th>
+                    <th>📝 Kommentar</th>
+                    <th>📞 Telefon</th>
+                    <th data-sort="rating">⭐ Bewertung</th>
+                    <th data-sort="reviews">🗳️ Bewertet von</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+    <footer>☁️ Automatische Cloud-Synchronisation (Firebase). Basisdaten (Name, Telefon, Bewertungen) nur mit Toggle editierbar. CRM-Felder immer editierbar.</footer>
+</div>
+<div id="toastMsg" class="toast-msg"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyALYmFSup8t5CMhD9uom4FbFREDCVaTWOQ",
+        authDomain: "barber-shops-oct.firebaseapp.com",
+        projectId: "barber-shops-oct",
+        storageBucket: "barber-shops-oct.firebasestorage.app",
+        messagingSenderId: "1000024387728",
+        appId: "1:1000024387728:web:79c644969c8eeb84b96815",
+        measurementId: "G-QRQBDM5T0M"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const collectionRef = collection(db, "friseure_final_v2");
+
+    // ----- 107 originale + 9 neue = 116 Friseure -----
+    const originalCSV = `Nr,Name,Telefon,Bewertung,Bewertet von
+1,Golden Hands for Ladies & Gents,+43 512 551371,,
+2,Schado Friseur OG,+43 660 4342455,5.0,96
+3,Friseur-Salon Melanie Winkler,+43 512 588369,4.8,77
+4,Friseur Felby by Vanessa Staffler,+43 512 552422,4.5,157
+5,Friseur MAX (Innrain 20),+43 650 5150606,,
+6,Marvin K. Barbershop,+43 512 582519,,
+7,Sixth Floor Hairlounge,+43 664 3535319,,
+8,HECHENBERGER.M.HAIR,+43 676 7059880,5.0,93
+9,STUDIO 13 – Caroline Jäckel,+43 512 587070,4.8,247
+10,Degler Exklusiv,+43 512 550590,,
+11,Beauty Corner Elisabeth,+43 512 588677,,
+12,chaos hairconcept,+43 512 581813,4.8,684
+13,Luxus Styling Salon,+43 660 1307778,4.9,63
+14,B HAIRDESIGN by Bashar Dyab,+43 676 5724244,,
+15,Mair Evelyn – Intercoiffeur,+43 512 561656,,
+16,daniel's haare – RathausGalerien,+43 512 581199,4.2,118
+17,Gentlemen Barber Club,+43 670 1837910,4.9,324
+18,Lamprecht Werner (Marktgraben 16),+43 512 583951,,
+19,Interhair Fred Franz e.U.,+43 512 580828,,
+20,Friseur Hofer,+43 512 583020,,
+21,Haarhaus,+43 512 584812,,
+22,Lamprecht Werner (Brixner Str.),+43 512 571860,,
+23,Coiffeur Catullo – Elite Professionals,+43 699 14242876,,
+24,Friseur Barbara,+43 512 578148,,
+25,Salon Münchner Kindl,+43 512 577384,,
+26,Impressive Haarsalon,+43 676 6645855,4.7,214
+27,Friseursalon Renas,+43 512 890569,4.9,72
+28,Friseur MAX (Museumstr. 21),+43 512 382720,1.3,1
+29,Head's by Martin Tauber,+43 699 11472147,4.8,53
+30,Max Friseur (Museumstr. 28),+43 664 8961071,4.1,204
+31,dm friseurstudio Sillpark,+43 512 567419,3.0,2
+32,Hairdresser Franz Stummer (Degler Central),+43 512 588805,4.6,76
+33,Servus Friseur,+43 512 319353,4.7,184
+34,Beautiful Hair by Lisa,+43 512 571631,4.9,46
+35,Élite Cut'Z Barberstudio,+43 676 6336338,5.0,55
+36,Coiffeur Lautsch e.U.,+43 512 380015,4.8,110
+37,Barber der Eleganz,+43 676 9288969,5.0,277
+38,Friseur Bayto,+43 512 583910,4.9,138
+39,Friseur Anas Barber Shop,+43 676 6300787,4.8,224
+40,Herrenfriseur STYLE M,+43 660 3519003,4.9,30
+41,Salon Haarlekin – Alexandra Hell,+43 512 574675,,
+42,Perfection Hairsalon,+43 676 5466376,4.9,69
+43,Regina Coiffure,+43 512 571749,5.0,6
+44,Friseursalon Verlockung,+43 676 7004665,5.0,1
+45,Enodeh Bradoh hairdressing,+43 512 276608,4.0,9
+46,Salon GERDA M,+43 676 6711080,,
+47,RayanCut,+43 660 7616220,,
+48,MAIR MARTIN COIFFURE,+43 512 576106,,
+49,The Wop Shop Norbert Raich,+43 676 6643903,,
+50,Friseur HairStyle Innsbruck,+43 512 576981,,
+51,KS Hair Friseursalon,+43 676 9505721,5.0,1
+52,Barbershop Boss,+43 512 559791,5.0,123
+53,Friseur Haar2o2,—,4.8,132
+54,Friseur Prima,+43 512 251968,4.6,172
+55,Pfeffer fürs Haar – Birgit Gurgisser,+43 699 12164569,,
+56,BARBER SALON (Leopoldstr. 42a),+43 676 4326201,5.0,6
+57,Avin / Saad Barber Friseursalon,+43 676 6232969,4.9,60
+58,Friseursalon Sabine Mang,+43 512 278011,,
+59,Friseur Fratelli,+43 512 278233,5.0,3
+60,Degler Hair Style,+43 512 393810,4.9,302
+61,Friseursalon Coiffure Velly,+43 677 64875097,4.6,182
+62,Friseur Schwamm / Hairlife,+43 512 365336,4.8,130
+63,Friseurhandwerk Haare & Make-up,+43 512 344945,4.9,43
+64,Oliver Preyer Hair Cut,+43 676 5245752,5.0,91
+65,Salon Er/Sie,+43 512 581318,,
+66,Rare's Barberstudio,+43 676 7737600,5.0,141
+67,Fade O'Clock Barbershop,+43 676 3222086,4.9,583
+68,Haar-Kosmetik-Lounge Marina M,+43 512 345305,,
+69,BARBER SALON (Pradler Str. 83),+43 676 5300813,4.8,49
+70,SALON TLAS,+43 676 7077069,5.0,169
+71,Stern Friseursalon,+43 676 4710473,4.7,109
+72,Salon HAARlem,+43 512 570474,4.9,23
+73,Cave Barbershop,+43 676 6022295,4.9,161
+74,Friseur Felby EKZ West,—,3.6,89
+75,YONAS Hairstyle,+43 512 295369,4.8,139
+76,Frisiersalon Gabi Probst,+43 512 295702,4.9,5
+77,Lamprecht Werner (Ampfererstr.),+43 512 284109,,
+78,Men's Cut and Barber Salon,+43 512 560949,,
+79,Friseur MAX (Schützenstr.),+43 512 261305,,
+80,Image Friseur,+43 676 5036068,,
+81,Friseursalon Lisa Unterberger,+43 650 3325007,,
+82,Friseur Miran,+43 688 64414353,,
+83,Coiffeursalon Bayto (Saggen),+43 512 583910,4.9,3
+84,Hairstylesbyleo,+43 512 346725,4.6,55
+85,Haar Atelier Selina,+43 512 393955,4.8,84
+86,KLIPP Frisör,—,,
+87,Roni Friseur,+43 676 4612399,4.8,123
+88,Este Hairdresser,+43 512 377275,4.9,184
+89,Friseursalon Rosemarie / Salon Lizz,+43 512 395395,4.7,38
+90,Friseur Wiedemann,+43 512 345583,4.8,36
+91,Asipova Styling,—,5.0,22
+92,Salon Looksus,+43 512 580006,4.9,62
+93,Friseur Atelier Petra Stolz,+43 699 14242876,4.9,85
+94,Hair Salon Er/Sie Simone Pöhli,+43 512 581318,4.9,106
+95,STIL Hairdressing GmbH,+43 512 205669,,
+96,JJ's OG / Nerox Style KG,—,5.0,1
+97,Winkler Tanja,+43 699 19028858,,
+98,dm friseurstudio DEZ,+43 512 391225,3.0,7
+99,Friseursalon DIAMOND,+43 660 6929899,,
+100,Haarstudio Alexandra,+43 512 29992917,,
+101,Lamprecht Werner (Kranewitterstr.),+43 512 396601,,
+102,Hairstyle by Su,+43 512 363389,5.0,70
+103,Salon Haarengel – Sabrina Engl,+43 512 578895,5.0,30
+104,Friseursalon Tino + Sonja,+43 512 265021,4.9,27
+105,Haarstudio Plank,+43 664 1055960,4.9,42
+106,Friseursalon Ruzica Bracher,+43 650 5222244,5.0,15
+107,Hair Design Frisiersalon (Egerdachstr.),+43 512 353728,5.0,40`;
+
+    const newSalonsCSV = `Nr,Name,Telefon,Bewertung,Anz. Bewertungen
+1,Stay Sharp Barberstudio,+43 660 5021636,5.0,672
+2,Inn Fade Barber Shop,+43 664 1367032,4.9,320
+3,Barbershop baro,+43 660 1552678,5.0,35
+4,Men's Cut and Barber Salon,+43 512 560949,4.6,81
+5,Batil Barbershop,+43 676 5035528,4.8,142
+6,Marvin K. BarberShop,+43 512 582519,4.8,236
+7,Herrensalon-Martin Barbershop,+43 512 551140,4.7,58
+8,Savanna Barbershop,+43 681 81203210,5.0,381
+9,Le Barbier Goethe,—,4.7,3`;
+
+    function parseCSVRow(rowStr) {
+        const res = []; let inQuotes = false, cur = '';
+        for (let c of rowStr) {
+            if (c === '"') inQuotes = !inQuotes;
+            else if (c === ',' && !inQuotes) { res.push(cur.trim()); cur = ''; }
+            else cur += c;
+        }
+        res.push(cur.trim()); return res;
+    }
+    function parseCSV(csv) {
+        const lines = csv.split(/\r?\n/);
+        const headers = parseCSVRow(lines[0]);
+        const data = [];
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const vals = parseCSVRow(line);
+            let obj = {};
+            headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
+            data.push(obj);
+        }
+        return data;
+    }
+
+    const original = parseCSV(originalCSV);
+    const newOnes = parseCSV(newSalonsCSV);
+    let allBase = [];
+    for (let item of original) {
+        allBase.push({
+            Nr: parseInt(item.Nr),
+            Name: item.Name,
+            Telefon: item.Telefon === "—" ? "" : item.Telefon,
+            Bewertung: item.Bewertung ? parseFloat(item.Bewertung) : null,
+            BewertetVon: parseInt(item["Bewertet von"]) || 0
+        });
+    }
+    let nextNr = 108;
+    for (let item of newOnes) {
+        allBase.push({
+            Nr: nextNr++,
+            Name: item.Name,
+            Telefon: item.Telefon === "—" ? "" : item.Telefon,
+            Bewertung: item.Bewertung ? parseFloat(item.Bewertung) : null,
+            BewertetVon: parseInt(item["Anz. Bewertungen"]) || 0
+        });
+    }
+
+    // Vollständige Salons mit CRM-Feldern
+    let salons = [];
+    let editBaseMode = false;   // Toggle für Name, Telefon, Bewertung, Anzahl
+    let currentSortKey = "nr";
+    let unsubscribe;
+
+    async function resetCloudAndReload() {
+        showToast("🔄 Lösche Cloud-Daten & lade 116 Friseure neu ...");
+        const snapshot = await getDocs(collectionRef);
+        const batch = writeBatch(db);
+        snapshot.forEach(doc => { batch.delete(doc.ref); });
+        await batch.commit();
+        // Neue Daten schreiben
+        for (let base of allBase) {
+            const docRef = doc(db, "friseure_final_v2", base.Nr.toString());
+            await setDoc(docRef, {
+                Nr: base.Nr,
+                Name: base.Name,
+                Telefon: base.Telefon,
+                Bewertung: base.Bewertung,
+                BewertetVon: base.BewertetVon,
+                priority: "Medium",
+                visited: false,
+                interested: "no",
+                followUp: "No",
+                followUpDate: "",
+                comments: ""
+            });
+        }
+        showToast("✅ Cloud zurückgesetzt – 116 Salons geladen");
+    }
+
+    async function updateSalonInFirestore(salon) {
+        const docRef = doc(db, "friseure_final_v2", salon.Nr.toString());
+        await setDoc(docRef, {
+            Nr: salon.Nr,
+            Name: salon.Name,
+            Telefon: salon.Telefon,
+            Bewertung: salon.Bewertung,
+            BewertetVon: salon.BewertetVon,
+            priority: salon.priority,
+            visited: salon.visited,
+            interested: salon.interested,
+            followUp: salon.followUp,
+            followUpDate: salon.followUpDate,
+            comments: salon.comments
+        }, { merge: true });
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById("toastMsg");
+        toast.textContent = msg;
+        toast.style.opacity = "1";
+        setTimeout(() => toast.style.opacity = "0", 2500);
+    }
+
+    function renderTable() {
+        const sorted = [...salons].sort(getComparator(currentSortKey));
+        document.getElementById("totalCount").innerText = sorted.length;
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        for (let salon of sorted) {
+            const row = tbody.insertRow();
+            if (salon.priority === "High") row.classList.add("priority-high-row");
+
+            // # (immer readonly)
+            const tdNr = row.insertCell(0);
+            tdNr.innerText = salon.Nr;
+
+            // Name (editierbar nur wenn editBaseMode)
+            const tdName = row.insertCell(1);
+            if (editBaseMode) {
+                const inp = document.createElement("input");
+                inp.type = "text"; inp.value = salon.Name; inp.className = "edit-input";
+                inp.addEventListener("change", async (e) => {
+                    salon.Name = e.target.value;
+                    await updateSalonInFirestore(salon);
+                    if (currentSortKey === "name") renderTable();
+                });
+                tdName.appendChild(inp);
+            } else {
+                tdName.innerText = salon.Name;
+            }
+
+            // Priorität (immer editierbar)
+            const tdPrio = row.insertCell(2);
+            const prioSelect = document.createElement("select");
+            prioSelect.className = `priority-select ${salon.priority.toLowerCase()}`;
+            ["High","Medium","Low"].forEach(l => {
+                const opt = document.createElement("option");
+                opt.value = l; opt.textContent = l;
+                if (salon.priority === l) opt.selected = true;
+                prioSelect.appendChild(opt);
+            });
+            prioSelect.addEventListener("change", async (e) => {
+                salon.priority = e.target.value;
+                await updateSalonInFirestore(salon);
+                if (currentSortKey === "priority") renderTable();
+                else {
+                    const row = e.target.closest("tr");
+                    if (salon.priority === "High") row.classList.add("priority-high-row");
+                    else row.classList.remove("priority-high-row");
+                    e.target.className = `priority-select ${salon.priority.toLowerCase()}`;
+                }
+            });
+            tdPrio.appendChild(prioSelect);
+
+            // Besucht (Checkbox, immer)
+            const tdVis = row.insertCell(3);
+            const chk = document.createElement("input");
+            chk.type = "checkbox"; chk.className = "visited-checkbox";
+            chk.checked = salon.visited;
+            chk.addEventListener("change", async (e) => {
+                salon.visited = e.target.checked;
+                await updateSalonInFirestore(salon);
+                if (currentSortKey === "visited") renderTable();
+            });
+            tdVis.appendChild(chk);
+
+            // Interessent (immer)
+            const tdInt = row.insertCell(4);
+            const intSel = document.createElement("select");
+            intSel.className = "interested-select";
+            ["no","Buying","Leasing"].forEach(v => {
+                const opt = document.createElement("option");
+                opt.value = v; opt.textContent = v;
+                if (salon.interested === v) opt.selected = true;
+                intSel.appendChild(opt);
+            });
+            intSel.addEventListener("change", async (e) => {
+                salon.interested = e.target.value;
+                await updateSalonInFirestore(salon);
+                if (currentSortKey === "interested") renderTable();
+            });
+            tdInt.appendChild(intSel);
+
+            // Follow-up (immer)
+            const tdFol = row.insertCell(5);
+            const folSel = document.createElement("select");
+            folSel.className = "followup-select";
+            ["No","Yes"].forEach(v => {
+                const opt = document.createElement("option");
+                opt.value = v; opt.textContent = v;
+                if (salon.followUp === v) opt.selected = true;
+                folSel.appendChild(opt);
+            });
+            folSel.addEventListener("change", async (e) => {
+                salon.followUp = e.target.value;
+                await updateSalonInFirestore(salon);
+                if (currentSortKey === "followup") renderTable();
+            });
+            tdFol.appendChild(folSel);
+
+            // Termin (immer)
+            const tdDate = row.insertCell(6);
+            const dateInp = document.createElement("input");
+            dateInp.type = "date"; dateInp.className = "date-input";
+            dateInp.min = "2026-01-01"; dateInp.max = "2099-12-31";
+            if (salon.followUpDate) dateInp.value = salon.followUpDate;
+            dateInp.addEventListener("change", async (e) => {
+                salon.followUpDate = e.target.value;
+                await updateSalonInFirestore(salon);
+                if (currentSortKey === "date") renderTable();
+            });
+            tdDate.appendChild(dateInp);
+
+            // Kommentar (immer)
+            const tdCom = row.insertCell(7);
+            const comInp = document.createElement("input");
+            comInp.type = "text"; comInp.className = "comments-input";
+            comInp.placeholder = "Notiz ..."; comInp.value = salon.comments || "";
+            comInp.addEventListener("change", async (e) => {
+                salon.comments = e.target.value;
+                await updateSalonInFirestore(salon);
+            });
+            tdCom.appendChild(comInp);
+
+            // Telefon (editierbar nur bei editBaseMode)
+            const tdTel = row.insertCell(8);
+            if (editBaseMode) {
+                const inp = document.createElement("input");
+                inp.type = "tel"; inp.value = salon.Telefon; inp.className = "edit-input";
+                inp.addEventListener("change", async (e) => {
+                    salon.Telefon = e.target.value;
+                    await updateSalonInFirestore(salon);
+                });
+                tdTel.appendChild(inp);
+            } else {
+                if (salon.Telefon) {
+                    const a = document.createElement("a");
+                    a.href = `tel:${salon.Telefon.replace(/\s/g, '')}`;
+                    a.innerText = salon.Telefon; a.className = "phone-link";
+                    tdTel.appendChild(a);
+                } else tdTel.innerHTML = '<span class="empty-value">—</span>';
+            }
+
+            // Bewertung (editierbar nur bei editBaseMode)
+            const tdRat = row.insertCell(9);
+            if (editBaseMode) {
+                const inp = document.createElement("input");
+                inp.type = "number"; inp.step = "0.1"; inp.min = "0"; inp.max = "5";
+                inp.value = salon.Bewertung !== null ? salon.Bewertung : "";
+                inp.placeholder = "–";
+                inp.className = "edit-number";
+                inp.addEventListener("change", async (e) => {
+                    let val = e.target.value === "" ? null : parseFloat(e.target.value);
+                    if (val !== null && (isNaN(val) || val < 0)) val = null;
+                    salon.Bewertung = val;
+                    await updateSalonInFirestore(salon);
+                    if (currentSortKey === "rating") renderTable();
+                });
+                tdRat.appendChild(inp);
+            } else {
+                if (salon.Bewertung !== null && !isNaN(salon.Bewertung)) {
+                    const cls = salon.Bewertung >= 4.7 ? "rating-high" : "";
+                    tdRat.innerHTML = `<span class="rating-badge ${cls}">⭐ ${salon.Bewertung.toFixed(1)}</span>`;
+                } else tdRat.innerHTML = '<span class="empty-value">—</span>';
+            }
+
+            // Bewertet von (editierbar nur bei editBaseMode)
+            const tdRev = row.insertCell(10);
+            if (editBaseMode) {
+                const inp = document.createElement("input");
+                inp.type = "number"; inp.step = "1"; inp.min = "0";
+                inp.value = salon.BewertetVon;
+                inp.className = "edit-number";
+                inp.addEventListener("change", async (e) => {
+                    let val = parseInt(e.target.value, 10);
+                    if (isNaN(val)) val = 0;
+                    salon.BewertetVon = val;
+                    await updateSalonInFirestore(salon);
+                    if (currentSortKey === "reviews") renderTable();
+                });
+                tdRev.appendChild(inp);
+            } else {
+                tdRev.innerText = salon.BewertetVon > 0 ? salon.BewertetVon : "—";
+            }
+        }
+    }
+
+    function getComparator(key) {
+        return (a,b) => {
+            if (key === "nr") return a.Nr - b.Nr;
+            if (key === "name") return a.Name.localeCompare(b.Name);
+            if (key === "priority") {
+                const order = { High:3, Medium:2, Low:1 };
+                return (order[b.priority]||0) - (order[a.priority]||0);
+            }
+            if (key === "visited") return (b.visited?1:0) - (a.visited?1:0);
+            if (key === "interested") {
+                const map = { Buying:3, Leasing:2, no:1 };
+                return (map[b.interested]||0) - (map[a.interested]||0);
+            }
+            if (key === "followup") return (b.followUp==="Yes"?1:0) - (a.followUp==="Yes"?1:0);
+            if (key === "date") {
+                let da = a.followUpDate ? new Date(a.followUpDate).getTime() : 0;
+                let db = b.followUpDate ? new Date(b.followUpDate).getTime() : 0;
+                return db - da;
+            }
+            if (key === "rating") {
+                let ra = a.Bewertung ?? -1, rb = b.Bewertung ?? -1;
+                if (ra === rb) return (b.BewertetVon||0) - (a.BewertetVon||0);
+                return rb - ra;
+            }
+            if (key === "reviews") return (b.BewertetVon||0) - (a.BewertetVon||0);
+            return 0;
+        };
+    }
+
+    function setSort(key) {
+        currentSortKey = key;
+        renderTable();
+        document.getElementById("sortSelect").value = key;
+    }
+
+    async function addNewSalon() {
+        let maxNr = 0;
+        for (let s of salons) if (s.Nr > maxNr) maxNr = s.Nr;
+        const newNr = maxNr + 1;
+        const newSalon = {
+            Nr: newNr,
+            Name: "Neuer Friseur",
+            Telefon: "",
+            Bewertung: null,
+            BewertetVon: 0,
+            priority: "Medium",
+            visited: false,
+            interested: "no",
+            followUp: "No",
+            followUpDate: "",
+            comments: ""
+        };
+        const docRef = doc(db, "friseure_final_v2", newNr.toString());
+        await setDoc(docRef, newSalon);
+        showToast(`➕ Friseur #${newNr} hinzugefügt`);
+    }
+
+    function toggleBaseEdit() {
+        editBaseMode = !editBaseMode;
+        const btn = document.getElementById("toggleBaseEditBtn");
+        if (editBaseMode) {
+            btn.innerHTML = "🔓 Basisdaten editieren (EIN)";
+            btn.classList.add("active");
+        } else {
+            btn.innerHTML = "✏️ Basisdaten editieren (AUS)";
+            btn.classList.remove("active");
+        }
+        renderTable();
+    }
+
+    function toggleDarkMode() {
+        const body = document.body;
+        if (body.classList.contains("light-mode")) {
+            body.classList.remove("light-mode");
+            body.classList.add("dark-mode");
+            document.getElementById("darkModeBtn").innerHTML = "☀️ Light Mode";
+        } else {
+            body.classList.remove("dark-mode");
+            body.classList.add("light-mode");
+            document.getElementById("darkModeBtn").innerHTML = "🌙 Dark Mode";
+        }
+    }
+
+    function bindUI() {
+        document.querySelectorAll("#tableHeader th[data-sort]").forEach(th => {
+            th.addEventListener("click", () => setSort(th.getAttribute("data-sort")));
+        });
+        document.getElementById("sortSelect").addEventListener("change", (e) => setSort(e.target.value));
+        document.getElementById("addBtn").addEventListener("click", addNewSalon);
+        document.getElementById("toggleBaseEditBtn").addEventListener("click", toggleBaseEdit);
+        document.getElementById("darkModeBtn").addEventListener("click", toggleDarkMode);
+        document.getElementById("resetCloudBtn").addEventListener("click", async () => {
+            if (confirm("Cloud komplett zurücksetzen? Alle eigenen Änderungen gehen verloren, 116 Standard-Friseure werden neu geladen.")) {
+                await resetCloudAndReload();
+            }
+        });
+    }
+
+    // Start: Firestore Live-Listener
+    onSnapshot(collectionRef, (snapshot) => {
+        const newList = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            newList.push({
+                Nr: data.Nr,
+                Name: data.Name || "",
+                Telefon: data.Telefon || "",
+                Bewertung: data.Bewertung ?? null,
+                BewertetVon: data.BewertetVon || 0,
+                priority: data.priority || "Medium",
+                visited: data.visited || false,
+                interested: data.interested || "no",
+                followUp: data.followUp || "No",
+                followUpDate: data.followUpDate || "",
+                comments: data.comments || ""
+            });
+        });
+        newList.sort((a,b) => a.Nr - b.Nr);
+        salons = newList;
+        renderTable();
+        if (salons.length === 0) {
+            showToast("⚠️ Keine Daten in Cloud – bitte „Cloud zurücksetzen“ drücken");
+        } else {
+            showToast(`☁️ ${salons.length} Salons geladen`);
+        }
+    });
+
+    bindUI();
+    // Optional: Beim Start prüfen, ob Daten vorhanden sind (kein automatischer Reset, weil User selbst entscheiden soll)
+</script>
+</body>
+</html>
