@@ -3,189 +3,507 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.2, maximum-scale=10.0, user-scalable=yes">
-    <title>💈 Friseure Innsbruck – Basisdaten‑Toggle + Cloud</title>
-    <style>
-        * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
-        body { margin: 0; padding: 20px; transition: background 0.2s, color 0.2s; }
-        body.light-mode { background: #eef2f5; color: #1a2c3e; }
-        body.dark-mode { background: #121212; color: #e0e0e0; }
-        .app-container {
-            max-width: 1600px; margin: 0 auto; border-radius: 28px; overflow: hidden;
-            transition: background 0.2s;
-        }
-        body.light-mode .app-container { background: white; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.12); }
-        body.dark-mode .app-container { background: #1e1e1e; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5); }
-        .toolbar {
-            padding: 1rem 1.5rem; border-bottom: 1px solid;
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;
-        }
-        body.light-mode .toolbar { background: #ffffff; border-bottom-color: #e2edf2; }
-        body.dark-mode .toolbar { background: #2d2d2d; border-bottom-color: #3a3a3a; }
-        h1 {
-            font-size: 1.5rem; font-weight: 700; margin: 0;
-            background: linear-gradient(135deg, #1F5E3A, #2C8C5A);
-            background-clip: text; -webkit-background-clip: text; color: transparent;
-            display: inline-flex; align-items: center; gap: 8px;
-        }
-        h1::before { content: "✂️"; font-size: 1.7rem; color: #2C8C5A; }
-        .button-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        .action-btn {
-            background: #1F5E3A; border: none; padding: 8px 18px; border-radius: 60px;
-            font-weight: 500; font-size: 0.85rem; cursor: pointer; color: white;
-        }
-        .action-btn:hover { background: #154d2e; }
-        .reset-btn { background: #c0392b; }
-        .reset-btn:hover { background: #a93226; }
-        .toggle-btn {
-            background: #2c3e50; border: none; padding: 8px 18px; border-radius: 60px;
-            font-weight: 500; font-size: 0.85rem; cursor: pointer; color: white;
-        }
-        .toggle-btn.active { background: #27ae60; }
-        .sort-control {
-            display: flex; align-items: center; gap: 12px;
-            background: #f8fafd; padding: 6px 16px; border-radius: 48px;
-        }
-        body.dark-mode .sort-control { background: #3a3a3a; }
-        #sortSelect {
-            padding: 8px 16px; border-radius: 40px; border: 1px solid #cbdde6;
-            background: white; font-weight: 500; font-size: 0.85rem; cursor: pointer;
-        }
-        body.dark-mode #sortSelect { background: #2d2d2d; color: #e0e0e0; border-color: #555; }
-        .stats {
-            background: #eef3f8; padding: 6px 18px; border-radius: 40px;
-            font-size: 0.85rem; font-weight: 500; color: #1f5e3a;
-        }
-        body.dark-mode .stats { background: #2a2a2a; color: #8bc34a; }
-        .stats span { font-weight: 800; background: white; padding: 2px 8px; border-radius: 30px; margin: 0 4px; }
-        body.dark-mode .stats span { background: #444; color: #e0e0e0; }
-        .table-wrapper { overflow-x: auto; overflow-y: auto; max-height: 70vh; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 1200px; }
-        th {
-            padding: 12px 8px; text-align: left; font-weight: 700; border-bottom: 2px solid;
-            position: sticky; top: 0; cursor: pointer; user-select: none;
-        }
-        body.light-mode th { background: #f4f9fe; border-bottom-color: #dce5ec; }
-        body.dark-mode th { background: #2a2a2a; border-bottom-color: #444; }
-        th:hover { opacity: 0.8; }
-        td { padding: 8px; border-bottom: 1px solid; vertical-align: middle; }
-        body.light-mode td { border-bottom-color: #e9edf2; }
-        body.dark-mode td { border-bottom-color: #333; }
-        tr:hover td { background-color: rgba(0,0,0,0.05); }
-        tr.priority-high-row td { background-color: rgba(245, 166, 35, 0.15); }
+    <title>Octos Barbershop Manager</title>
 
-        /* Eingabefelder */
-        .edit-input, .edit-number {
-            width: 100%; padding: 6px 8px; border-radius: 12px;
-            border: 1px solid #cfdfe9; background: white; font-size: 0.75rem;
+    <!-- App‑Icon für den Homescreen (invertierte Farben – du musst Logo App.png bereitstellen) -->
+    <link rel="apple-touch-icon" href="Logo App.png">
+    <link rel="icon" type="image/png" href="Logo App.png">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        body.dark-mode .edit-input, body.dark-mode .edit-number {
-            background: #3a3a3a; color: #e0e0e0; border-color: #555;
+
+        body {
+            background: #f5f7fa;
+            color: #1e2a32;
+            padding: 20px;
+            transition: background 0.2s, color 0.2s;
+            min-height: 100vh;
         }
-        .priority-select, .interested-select, .followup-select {
-            padding: 6px 8px; border-radius: 30px; border: 1px solid #cfdfe9;
-            background: white; font-size: 0.75rem; width: 95px;
+
+        body.dark-mode {
+            background: #121416;
+            color: #e8edf2;
         }
-        .priority-select.high { background-color: #ffe0b3; }
-        body.dark-mode .priority-select, body.dark-mode .interested-select, body.dark-mode .followup-select {
-            background: #3a3a3a; color: #e0e0e0; border-color: #555;
+
+        /* Hauptcontainer – flaches, klares Design */
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: background 0.2s, box-shadow 0.2s;
         }
-        .visited-checkbox { width: 20px; height: 20px; accent-color: #2c8c5a; cursor: pointer; }
-        .date-input {
-            padding: 6px 8px; border-radius: 20px; border: 1px solid #cfdfe9;
-            font-size: 0.7rem; width: 120px; background: white;
+
+        body.dark-mode .app-container {
+            background: #1e2228;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
         }
-        body.dark-mode .date-input { background: #3a3a3a; color: #e0e0e0; border-color: #555; }
-        .comments-input {
-            padding: 6px 8px; border-radius: 12px; border: 1px solid #cfdfe9;
-            font-size: 0.75rem; width: 140px; background: white;
+
+        /* Toolbar – minimalistisch */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e9edf2;
+            gap: 16px;
+            background: #ffffff;
         }
-        body.dark-mode .comments-input { background: #3a3a3a; color: #e0e0e0; border-color: #555; }
-        .rating-badge { background: #f5e7d3; padding: 4px 10px; border-radius: 40px; display: inline-block; }
-        .rating-high { background: #d9f0e3; color: #146b3a; }
-        .phone-link { color: #2c6e9e; text-decoration: none; }
-        .empty-value { color: #9aaebf; }
-        footer {
-            padding: 0.8rem 1.5rem; font-size: 0.7rem; text-align: center;
-            border-top: 1px solid;
+
+        body.dark-mode .toolbar {
+            background: #1e2228;
+            border-bottom-color: #2e333a;
         }
-        body.light-mode footer { border-top-color: #e2edf2; }
-        body.dark-mode footer { border-top-color: #333; }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand img {
+            height: 40px;
+            width: auto;
+            display: block;
+        }
+
+        .brand h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            color: #1e2a32;
+            margin: 0;
+        }
+
+        body.dark-mode .brand h1 {
+            color: #e8edf2;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid #d0d8e0;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s ease;
+            color: #1e2a32;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #1e2a32;
+            border-color: #1e2a32;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2e3e4a;
+            border-color: #2e3e4a;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border-color: #d0d8e0;
+        }
+
+        .btn-outline:hover {
+            background: #f0f2f5;
+            border-color: #b0bcc8;
+        }
+
+        body.dark-mode .btn {
+            border-color: #3a424a;
+            color: #dce3ea;
+        }
+
+        body.dark-mode .btn-outline:hover {
+            background: #2a3038;
+            border-color: #5a6a7a;
+        }
+
+        body.dark-mode .btn-primary {
+            background: #dce3ea;
+            border-color: #dce3ea;
+            color: #1e2a32;
+        }
+
+        body.dark-mode .btn-primary:hover {
+            background: #eef3f8;
+            border-color: #eef3f8;
+        }
+
+        .sort-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sort-control label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #6a7a8a;
+        }
+
+        #sortSelect {
+            padding: 6px 14px;
+            border-radius: 40px;
+            border: 1px solid #d0d8e0;
+            background: white;
+            font-size: 0.8rem;
+            color: #1e2a32;
+            cursor: pointer;
+            outline: none;
+            transition: 0.1s;
+        }
+
+        #sortSelect:focus {
+            border-color: #1e2a32;
+        }
+
+        body.dark-mode #sortSelect {
+            background: #2a3038;
+            border-color: #3a424a;
+            color: #dce3ea;
+        }
+
+        .stats {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #6a7a8a;
+            background: #f0f2f5;
+            padding: 4px 16px;
+            border-radius: 40px;
+            white-space: nowrap;
+        }
+
+        body.dark-mode .stats {
+            background: #2a3038;
+            color: #9aabba;
+        }
+
+        .stats span {
+            font-weight: 700;
+            color: #1e2a32;
+        }
+
+        body.dark-mode .stats span {
+            color: #e8edf2;
+        }
+
+        /* Tabelle – clean */
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 72vh;
+            padding: 0 4px 4px 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            min-width: 1100px;
+        }
+
+        th {
+            padding: 14px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #4a5a6a;
+            border-bottom: 1px solid #e9edf2;
+            background: #fafbfc;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            transition: background 0.1s;
+        }
+
+        th:hover {
+            background: #f0f2f5;
+        }
+
+        body.dark-mode th {
+            background: #23282e;
+            border-bottom-color: #2e333a;
+            color: #9aabba;
+        }
+
+        body.dark-mode th:hover {
+            background: #2a3038;
+        }
+
+        td {
+            padding: 10px 10px;
+            border-bottom: 1px solid #eef2f6;
+            vertical-align: middle;
+            background-color: white;
+        }
+
+        body.dark-mode td {
+            background-color: #1e2228;
+            border-bottom-color: #2a3038;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        body.dark-mode tr:hover td {
+            background-color: #282e36;
+        }
+
+        /* Priority High markieren – dezenter Akzent */
+        tr.priority-high td {
+            background-color: #f4f6f8;
+            border-left: 3px solid #6a7a8a;
+        }
+
+        body.dark-mode tr.priority-high td {
+            background-color: #2a2f36;
+            border-left-color: #8a9aaa;
+        }
+
+        /* Eingabefelder – dezente Umrandung */
+        .edit-input, .edit-number, .priority-select, .interested-select, .followup-select, .date-input, .comments-input {
+            width: 100%;
+            padding: 6px 10px;
+            border-radius: 12px;
+            border: 1px solid #dce2e8;
+            background: white;
+            font-size: 0.78rem;
+            color: #1e2a32;
+            transition: 0.1s;
+            font-family: inherit;
+            min-width: 80px;
+        }
+
+        .edit-input:focus, .edit-number:focus, .date-input:focus, .comments-input:focus {
+            border-color: #1e2a32;
+            outline: none;
+        }
+
+        body.dark-mode .edit-input,
+        body.dark-mode .edit-number,
+        body.dark-mode .priority-select,
+        body.dark-mode .interested-select,
+        body.dark-mode .followup-select,
+        body.dark-mode .date-input,
+        body.dark-mode .comments-input {
+            background: #2a3038;
+            border-color: #3a424a;
+            color: #dce3ea;
+        }
+
+        body.dark-mode .edit-input:focus,
+        body.dark-mode .edit-number:focus,
+        body.dark-mode .date-input:focus,
+        body.dark-mode .comments-input:focus {
+            border-color: #8a9aaa;
+        }
+
+        .priority-select.high { background-color: #e4e8ec; }
+        body.dark-mode .priority-select.high { background-color: #3a424a; }
+
+        .visited-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #1e2a32;
+            cursor: pointer;
+        }
+
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f0f2f5;
+            padding: 2px 12px 2px 8px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            color: #1e2a32;
+        }
+
+        .rating-badge.high {
+            background: #e4e8ec;
+        }
+
+        body.dark-mode .rating-badge {
+            background: #2a3038;
+            color: #dce3ea;
+        }
+
+        body.dark-mode .rating-badge.high {
+            background: #3a424a;
+        }
+
+        .phone-link {
+            color: #1e2a32;
+            text-decoration: none;
+            border-bottom: 1px dotted #b0bcc8;
+        }
+
+        body.dark-mode .phone-link {
+            color: #dce3ea;
+            border-bottom-color: #4a5a6a;
+        }
+
+        .empty-value {
+            color: #9aabba;
+            font-size: 0.75rem;
+        }
+
+        /* Footer */
+        .app-footer {
+            padding: 12px 24px;
+            font-size: 0.7rem;
+            color: #8a9aaa;
+            border-top: 1px solid #e9edf2;
+            text-align: center;
+            background: #ffffff;
+        }
+
+        body.dark-mode .app-footer {
+            background: #1e2228;
+            border-top-color: #2e333a;
+            color: #6a7a8a;
+        }
+
         .toast-msg {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #1a2c3e; color: white; padding: 6px 18px; border-radius: 40px;
-            font-size: 0.8rem; opacity: 0; transition: 0.2s; pointer-events: none; z-index: 1000;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2a32;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .toast-msg {
+            background: #2a3038;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            body { padding: 12px; }
+            .toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
+            .brand h1 { font-size: 1.2rem; }
+            .stats { align-self: flex-start; }
         }
     </style>
 </head>
 <body class="light-mode">
-<div class="app-container">
-    <div class="toolbar">
-        <h1>💈 Friseure Innsbruck</h1>
-        <div class="button-group">
-            <button id="addBtn" class="action-btn">➕ Neu</button>
-            <button id="toggleBaseEditBtn" class="toggle-btn">✏️ Basisdaten editieren (AUS)</button>
-            <button id="darkModeBtn" class="action-btn" style="background:#2c3e50;">🌙 Dark Mode</button>
-            <!-- <button id="resetCloudBtn" class="action-btn reset-btn">🔄 Cloud zurücksetzen</button> -->
+
+    <div class="app-container">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="brand">
+                <!-- Dein octos‑Logo (octos-logo.png) muss im gleichen Ordner liegen -->
+                <img src="octos-logo.png" alt="Octos" id="brandLogo">
+                <h1>Barbershop Manager</h1>
+            </div>
+
+            <div class="button-group">
+                <button id="addBtn" class="btn btn-primary">+ Neu</button>
+                <button id="toggleBaseEditBtn" class="btn btn-outline">✎ Basisdaten</button>
+                <button id="darkModeBtn" class="btn btn-outline">☯ Dunkel</button>
+            </div>
+
+            <div class="sort-control">
+                <label for="sortSelect">Sortieren</label>
+                <select id="sortSelect">
+                    <option value="nr">#</option>
+                    <option value="name">Name</option>
+                    <option value="priority">Priorität</option>
+                    <option value="visited">Besucht</option>
+                    <option value="interested">Interessent</option>
+                    <option value="followup">Follow‑up</option>
+                    <option value="date">Termin</option>
+                    <option value="rating">Bewertung</option>
+                    <option value="reviews">Anzahl Bewertungen</option>
+                </select>
+            </div>
+
+            <div class="stats">🧾 <span id="totalCount">0</span> Salons</div>
         </div>
-        <div class="sort-control">
-            <label>📋 Sortieren:</label>
-            <select id="sortSelect">
-                <option value="nr">#</option>
-                <option value="name">Name</option>
-                <option value="priority">⭐ Priorität</option>
-                <option value="visited">✅ Besucht</option>
-                <option value="interested">💼 Interessent</option>
-                <option value="followup">📞 Follow‑up</option>
-                <option value="date">📅 Termin</option>
-                <option value="rating">⭐ Bewertung</option>
-                <option value="reviews">🗳️ Bewertet von</option>
-            </select>
+
+        <!-- Tabelle -->
+        <div class="table-wrapper">
+            <table id="salonTable">
+                <thead>
+                    <tr id="tableHeader">
+                        <th data-sort="nr">#</th>
+                        <th data-sort="name">Name</th>
+                        <th data-sort="priority">Priorität</th>
+                        <th data-sort="visited">Besucht</th>
+                        <th data-sort="interested">Interessent</th>
+                        <th data-sort="followup">Follow‑up</th>
+                        <th data-sort="date">Termin</th>
+                        <th>Kommentar</th>
+                        <th>Telefon</th>
+                        <th data-sort="rating">⭐ Bewertung</th>
+                        <th data-sort="reviews">Anzahl</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
         </div>
-        <div class="stats">📊 <span id="totalCount">0</span> Salons</div>
+
+        <div class="app-footer">
+            ☁️ Automatische Cloud‑Synchronisation · Basisdaten mit Toggle bearbeitbar · CRM‑Felder immer editierbar
+        </div>
     </div>
-    <div class="table-wrapper">
-        <table id="salonTable">
-            <thead>
-                <tr id="tableHeader">
-                    <th data-sort="nr">#</th>
-                    <th data-sort="name">Name</th>
-                    <th data-sort="priority">⭐ Priorität</th>
-                    <th data-sort="visited">✅ Besucht</th>
-                    <th data-sort="interested">💼 Interessent</th>
-                    <th data-sort="followup">⏰ Follow‑up</th>
-                    <th data-sort="date">📅 Termin</th>
-                    <th>📝 Kommentar</th>
-                    <th>📞 Telefon</th>
-                    <th data-sort="rating">⭐ Bewertung</th>
-                    <th data-sort="reviews">🗳️ Bewertet von</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-    </div>
-    <footer>☁️ Automatische Cloud-Synchronisation (Firebase). Basisdaten (Name, Telefon, Bewertungen) nur mit Toggle editierbar. CRM-Felder immer editierbar.</footer>
-</div>
-<div id="toastMsg" class="toast-msg"></div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+    <div id="toastMsg" class="toast-msg"></div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyALYmFSup8t5CMhD9uom4FbFREDCVaTWOQ",
-        authDomain: "barber-shops-oct.firebaseapp.com",
-        projectId: "barber-shops-oct",
-        storageBucket: "barber-shops-oct.firebasestorage.app",
-        messagingSenderId: "1000024387728",
-        appId: "1:1000024387728:web:79c644969c8eeb84b96815",
-        measurementId: "G-QRQBDM5T0M"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const collectionRef = collection(db, "friseure_final_v2");
+    <!-- Firebase + gesamte Logik (unverändert, aber ohne Emojis) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-    // ----- 107 originale + 9 neue = 116 Friseure -----
-    const originalCSV = `Nr,Name,Telefon,Bewertung,Bewertet von
+        const firebaseConfig = {
+            apiKey: "AIzaSyALYmFSup8t5CMhD9uom4FbFREDCVaTWOQ",
+            authDomain: "barber-shops-oct.firebaseapp.com",
+            projectId: "barber-shops-oct",
+            storageBucket: "barber-shops-oct.firebasestorage.app",
+            messagingSenderId: "1000024387728",
+            appId: "1:1000024387728:web:79c644969c8eeb84b96815",
+            measurementId: "G-QRQBDM5T0M"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const collectionRef = collection(db, "friseure_final_v2");
+
+        // ----- 116 Friseure (wie gehabt) -----
+        const originalCSV = `Nr,Name,Telefon,Bewertung,Bewertet von
 1,Golden Hands for Ladies & Gents,+43 512 551371,,
 2,Schado Friseur OG,+43 660 4342455,5.0,96
 3,Friseur-Salon Melanie Winkler,+43 512 588369,4.8,77
@@ -294,7 +612,7 @@
 106,Friseursalon Ruzica Bracher,+43 650 5222244,5.0,15
 107,Hair Design Frisiersalon (Egerdachstr.),+43 512 353728,5.0,40`;
 
-    const newSalonsCSV = `Nr,Name,Telefon,Bewertung,Anz. Bewertungen
+        const newSalonsCSV = `Nr,Name,Telefon,Bewertung,Anz. Bewertungen
 1,Stay Sharp Barberstudio,+43 660 5021636,5.0,672
 2,Inn Fade Barber Shop,+43 664 1367032,4.9,320
 3,Barbershop baro,+43 660 1552678,5.0,35
@@ -305,377 +623,369 @@
 8,Savanna Barbershop,+43 681 81203210,5.0,381
 9,Le Barbier Goethe,—,4.7,3`;
 
-    function parseCSVRow(rowStr) {
-        const res = []; let inQuotes = false, cur = '';
-        for (let c of rowStr) {
-            if (c === '"') inQuotes = !inQuotes;
-            else if (c === ',' && !inQuotes) { res.push(cur.trim()); cur = ''; }
-            else cur += c;
+        function parseCSVRow(rowStr) {
+            const res = []; let inQuotes = false, cur = '';
+            for (let c of rowStr) {
+                if (c === '"') inQuotes = !inQuotes;
+                else if (c === ',' && !inQuotes) { res.push(cur.trim()); cur = ''; }
+                else cur += c;
+            }
+            res.push(cur.trim()); return res;
         }
-        res.push(cur.trim()); return res;
-    }
-    function parseCSV(csv) {
-        const lines = csv.split(/\r?\n/);
-        const headers = parseCSVRow(lines[0]);
-        const data = [];
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-            const vals = parseCSVRow(line);
-            let obj = {};
-            headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
-            data.push(obj);
+        function parseCSV(csv) {
+            const lines = csv.split(/\r?\n/);
+            const headers = parseCSVRow(lines[0]);
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const vals = parseCSVRow(line);
+                let obj = {};
+                headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
+                data.push(obj);
+            }
+            return data;
         }
-        return data;
-    }
 
-    const original = parseCSV(originalCSV);
-    const newOnes = parseCSV(newSalonsCSV);
-    let allBase = [];
-    for (let item of original) {
-        allBase.push({
-            Nr: parseInt(item.Nr),
-            Name: item.Name,
-            Telefon: item.Telefon === "—" ? "" : item.Telefon,
-            Bewertung: item.Bewertung ? parseFloat(item.Bewertung) : null,
-            BewertetVon: parseInt(item["Bewertet von"]) || 0
-        });
-    }
-    let nextNr = 108;
-    for (let item of newOnes) {
-        allBase.push({
-            Nr: nextNr++,
-            Name: item.Name,
-            Telefon: item.Telefon === "—" ? "" : item.Telefon,
-            Bewertung: item.Bewertung ? parseFloat(item.Bewertung) : null,
-            BewertetVon: parseInt(item["Anz. Bewertungen"]) || 0
-        });
-    }
+        const original = parseCSV(originalCSV);
+        const newOnes = parseCSV(newSalonsCSV);
+        let allBase = [];
+        for (let item of original) {
+            allBase.push({
+                Nr: parseInt(item.Nr),
+                Name: item.Name,
+                Telefon: item.Telefon === "—" ? "" : item.Telefon,
+                Bewertung: item.Bewertung ? parseFloat(item.Bewertung) : null,
+                BewertetVon: parseInt(item["Bewertet von"]) || 0
+            });
+        }
+        let nextNr = 108;
+        for (let item of newOnes) {
+            allBase.push({
+                Nr: nextNr++,
+                Name: item.Name,
+                Telefon: item.Telefon === "—" ? "" : item.Telefon,
+                Bewertung: item.Bewertung ? parseFloat(item.Bewertung) : null,
+                BewertetVon: parseInt(item["Anz. Bewertungen"]) || 0
+            });
+        }
 
-    // Vollständige Salons mit CRM-Feldern
-    let salons = [];
-    let editBaseMode = false;   // Toggle für Name, Telefon, Bewertung, Anzahl
-    let currentSortKey = "nr";
-    let unsubscribe;
+        let salons = [];
+        let editBaseMode = false;
+        let currentSortKey = "nr";
+        let isFirstLoad = true;
 
-    async function resetCloudAndReload() {
-        showToast("🔄 Lösche Cloud-Daten & lade 116 Friseure neu ...");
-        const snapshot = await getDocs(collectionRef);
-        const batch = writeBatch(db);
-        snapshot.forEach(doc => { batch.delete(doc.ref); });
-        await batch.commit();
-        // Neue Daten schreiben
-        for (let base of allBase) {
-            const docRef = doc(db, "friseure_final_v2", base.Nr.toString());
+        async function updateSalonInFirestore(salon) {
+            const docRef = doc(db, "friseure_final_v2", salon.Nr.toString());
             await setDoc(docRef, {
-                Nr: base.Nr,
-                Name: base.Name,
-                Telefon: base.Telefon,
-                Bewertung: base.Bewertung,
-                BewertetVon: base.BewertetVon,
+                Nr: salon.Nr,
+                Name: salon.Name,
+                Telefon: salon.Telefon,
+                Bewertung: salon.Bewertung,
+                BewertetVon: salon.BewertetVon,
+                priority: salon.priority,
+                visited: salon.visited,
+                interested: salon.interested,
+                followUp: salon.followUp,
+                followUpDate: salon.followUpDate,
+                comments: salon.comments
+            }, { merge: true });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toastMsg");
+            toast.textContent = msg;
+            toast.style.opacity = "1";
+            setTimeout(() => toast.style.opacity = "0", 2500);
+        }
+
+        function getComparator(key) {
+            return (a,b) => {
+                if (key === "nr") return a.Nr - b.Nr;
+                if (key === "name") return a.Name.localeCompare(b.Name);
+                if (key === "priority") {
+                    const order = { High:3, Medium:2, Low:1 };
+                    return (order[b.priority]||0) - (order[a.priority]||0);
+                }
+                if (key === "visited") return (b.visited?1:0) - (a.visited?1:0);
+                if (key === "interested") {
+                    const map = { Buying:3, Leasing:2, no:1 };
+                    return (map[b.interested]||0) - (map[a.interested]||0);
+                }
+                if (key === "followup") return (b.followUp==="Yes"?1:0) - (a.followUp==="Yes"?1:0);
+                if (key === "date") {
+                    let da = a.followUpDate ? new Date(a.followUpDate).getTime() : 0;
+                    let db = b.followUpDate ? new Date(b.followUpDate).getTime() : 0;
+                    return db - da;
+                }
+                if (key === "rating") {
+                    let ra = a.Bewertung ?? -1, rb = b.Bewertung ?? -1;
+                    if (ra === rb) return (b.BewertetVon||0) - (a.BewertetVon||0);
+                    return rb - ra;
+                }
+                if (key === "reviews") return (b.BewertetVon||0) - (a.BewertetVon||0);
+                return 0;
+            };
+        }
+
+        function renderTable() {
+            const sorted = [...salons].sort(getComparator(currentSortKey));
+            document.getElementById("totalCount").innerText = sorted.length;
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+            for (let salon of sorted) {
+                const row = tbody.insertRow();
+                if (salon.priority === "High") row.classList.add("priority-high");
+
+                // # (immer nur Text)
+                const tdNr = row.insertCell(0);
+                tdNr.innerText = salon.Nr;
+
+                // Name
+                const tdName = row.insertCell(1);
+                if (editBaseMode) {
+                    const inp = document.createElement("input");
+                    inp.type = "text"; inp.value = salon.Name; inp.className = "edit-input";
+                    inp.addEventListener("change", async (e) => {
+                        salon.Name = e.target.value;
+                        await updateSalonInFirestore(salon);
+                        if (currentSortKey === "name") renderTable();
+                    });
+                    tdName.appendChild(inp);
+                } else {
+                    tdName.innerText = salon.Name;
+                }
+
+                // Priorität
+                const tdPrio = row.insertCell(2);
+                const prioSelect = document.createElement("select");
+                prioSelect.className = `priority-select ${salon.priority.toLowerCase()}`;
+                ["High","Medium","Low"].forEach(l => {
+                    const opt = document.createElement("option");
+                    opt.value = l; opt.textContent = l;
+                    if (salon.priority === l) opt.selected = true;
+                    prioSelect.appendChild(opt);
+                });
+                prioSelect.addEventListener("change", async (e) => {
+                    salon.priority = e.target.value;
+                    await updateSalonInFirestore(salon);
+                    if (currentSortKey === "priority") renderTable();
+                    else {
+                        const row = e.target.closest("tr");
+                        if (salon.priority === "High") row.classList.add("priority-high");
+                        else row.classList.remove("priority-high");
+                        e.target.className = `priority-select ${salon.priority.toLowerCase()}`;
+                    }
+                });
+                tdPrio.appendChild(prioSelect);
+
+                // Besucht
+                const tdVis = row.insertCell(3);
+                const chk = document.createElement("input");
+                chk.type = "checkbox"; chk.className = "visited-checkbox";
+                chk.checked = salon.visited;
+                chk.addEventListener("change", async (e) => {
+                    salon.visited = e.target.checked;
+                    await updateSalonInFirestore(salon);
+                    if (currentSortKey === "visited") renderTable();
+                });
+                tdVis.appendChild(chk);
+
+                // Interessent
+                const tdInt = row.insertCell(4);
+                const intSel = document.createElement("select");
+                intSel.className = "interested-select";
+                ["no","Buying","Leasing"].forEach(v => {
+                    const opt = document.createElement("option");
+                    opt.value = v; opt.textContent = v;
+                    if (salon.interested === v) opt.selected = true;
+                    intSel.appendChild(opt);
+                });
+                intSel.addEventListener("change", async (e) => {
+                    salon.interested = e.target.value;
+                    await updateSalonInFirestore(salon);
+                    if (currentSortKey === "interested") renderTable();
+                });
+                tdInt.appendChild(intSel);
+
+                // Follow-up
+                const tdFol = row.insertCell(5);
+                const folSel = document.createElement("select");
+                folSel.className = "followup-select";
+                ["No","Yes"].forEach(v => {
+                    const opt = document.createElement("option");
+                    opt.value = v; opt.textContent = v;
+                    if (salon.followUp === v) opt.selected = true;
+                    folSel.appendChild(opt);
+                });
+                folSel.addEventListener("change", async (e) => {
+                    salon.followUp = e.target.value;
+                    await updateSalonInFirestore(salon);
+                    if (currentSortKey === "followup") renderTable();
+                });
+                tdFol.appendChild(folSel);
+
+                // Termin
+                const tdDate = row.insertCell(6);
+                const dateInp = document.createElement("input");
+                dateInp.type = "date"; dateInp.className = "date-input";
+                dateInp.min = "2026-01-01"; dateInp.max = "2099-12-31";
+                if (salon.followUpDate) dateInp.value = salon.followUpDate;
+                dateInp.addEventListener("change", async (e) => {
+                    salon.followUpDate = e.target.value;
+                    await updateSalonInFirestore(salon);
+                    if (currentSortKey === "date") renderTable();
+                });
+                tdDate.appendChild(dateInp);
+
+                // Kommentar
+                const tdCom = row.insertCell(7);
+                const comInp = document.createElement("input");
+                comInp.type = "text"; comInp.className = "comments-input";
+                comInp.placeholder = "Notiz ..."; comInp.value = salon.comments || "";
+                comInp.addEventListener("change", async (e) => {
+                    salon.comments = e.target.value;
+                    await updateSalonInFirestore(salon);
+                });
+                tdCom.appendChild(comInp);
+
+                // Telefon
+                const tdTel = row.insertCell(8);
+                if (editBaseMode) {
+                    const inp = document.createElement("input");
+                    inp.type = "tel"; inp.value = salon.Telefon; inp.className = "edit-input";
+                    inp.addEventListener("change", async (e) => {
+                        salon.Telefon = e.target.value;
+                        await updateSalonInFirestore(salon);
+                    });
+                    tdTel.appendChild(inp);
+                } else {
+                    if (salon.Telefon) {
+                        const a = document.createElement("a");
+                        a.href = `tel:${salon.Telefon.replace(/\s/g, '')}`;
+                        a.innerText = salon.Telefon; a.className = "phone-link";
+                        tdTel.appendChild(a);
+                    } else tdTel.innerHTML = '<span class="empty-value">—</span>';
+                }
+
+                // Bewertung (⭐ bleibt)
+                const tdRat = row.insertCell(9);
+                if (editBaseMode) {
+                    const inp = document.createElement("input");
+                    inp.type = "number"; inp.step = "0.1"; inp.min = "0"; inp.max = "5";
+                    inp.value = salon.Bewertung !== null ? salon.Bewertung : "";
+                    inp.placeholder = "–";
+                    inp.className = "edit-number";
+                    inp.addEventListener("change", async (e) => {
+                        let val = e.target.value === "" ? null : parseFloat(e.target.value);
+                        if (val !== null && (isNaN(val) || val < 0)) val = null;
+                        salon.Bewertung = val;
+                        await updateSalonInFirestore(salon);
+                        if (currentSortKey === "rating") renderTable();
+                    });
+                    tdRat.appendChild(inp);
+                } else {
+                    if (salon.Bewertung !== null && !isNaN(salon.Bewertung)) {
+                        const cls = salon.Bewertung >= 4.7 ? "high" : "";
+                        tdRat.innerHTML = `<span class="rating-badge ${cls}">⭐ ${salon.Bewertung.toFixed(1)}</span>`;
+                    } else tdRat.innerHTML = '<span class="empty-value">—</span>';
+                }
+
+                // Bewertet von
+                const tdRev = row.insertCell(10);
+                if (editBaseMode) {
+                    const inp = document.createElement("input");
+                    inp.type = "number"; inp.step = "1"; inp.min = "0";
+                    inp.value = salon.BewertetVon;
+                    inp.className = "edit-number";
+                    inp.addEventListener("change", async (e) => {
+                        let val = parseInt(e.target.value, 10);
+                        if (isNaN(val)) val = 0;
+                        salon.BewertetVon = val;
+                        await updateSalonInFirestore(salon);
+                        if (currentSortKey === "reviews") renderTable();
+                    });
+                    tdRev.appendChild(inp);
+                } else {
+                    tdRev.innerText = salon.BewertetVon > 0 ? salon.BewertetVon : "—";
+                }
+            }
+        }
+
+        function setSort(key) {
+            currentSortKey = key;
+            renderTable();
+            document.getElementById("sortSelect").value = key;
+        }
+
+        async function addNewSalon() {
+            let maxNr = 0;
+            for (let s of salons) if (s.Nr > maxNr) maxNr = s.Nr;
+            const newNr = maxNr + 1;
+            const newSalon = {
+                Nr: newNr,
+                Name: "Neuer Friseur",
+                Telefon: "",
+                Bewertung: null,
+                BewertetVon: 0,
                 priority: "Medium",
                 visited: false,
                 interested: "no",
                 followUp: "No",
                 followUpDate: "",
                 comments: ""
-            });
+            };
+            const docRef = doc(db, "friseure_final_v2", newNr.toString());
+            await setDoc(docRef, newSalon);
+            showToast(`Neuer Friseur #${newNr} hinzugefügt`);
         }
-        showToast("✅ Cloud zurückgesetzt – 116 Salons geladen");
-    }
 
-    async function updateSalonInFirestore(salon) {
-        const docRef = doc(db, "friseure_final_v2", salon.Nr.toString());
-        await setDoc(docRef, {
-            Nr: salon.Nr,
-            Name: salon.Name,
-            Telefon: salon.Telefon,
-            Bewertung: salon.Bewertung,
-            BewertetVon: salon.BewertetVon,
-            priority: salon.priority,
-            visited: salon.visited,
-            interested: salon.interested,
-            followUp: salon.followUp,
-            followUpDate: salon.followUpDate,
-            comments: salon.comments
-        }, { merge: true });
-    }
+        function toggleBaseEdit() {
+            editBaseMode = !editBaseMode;
+            const btn = document.getElementById("toggleBaseEditBtn");
+            btn.innerText = editBaseMode ? "✎ Basisdaten (Ein)" : "✎ Basisdaten (Aus)";
+            renderTable();
+        }
 
-    function showToast(msg) {
-        const toast = document.getElementById("toastMsg");
-        toast.textContent = msg;
-        toast.style.opacity = "1";
-        setTimeout(() => toast.style.opacity = "0", 2500);
-    }
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            const btn = document.getElementById("darkModeBtn");
+            btn.innerText = document.body.classList.contains("dark-mode") ? "☀ Hell" : "☯ Dunkel";
+        }
 
-    function renderTable() {
-        const sorted = [...salons].sort(getComparator(currentSortKey));
-        document.getElementById("totalCount").innerText = sorted.length;
-        const tbody = document.getElementById("tableBody");
-        tbody.innerHTML = "";
-        for (let salon of sorted) {
-            const row = tbody.insertRow();
-            if (salon.priority === "High") row.classList.add("priority-high-row");
-
-            // # (immer readonly)
-            const tdNr = row.insertCell(0);
-            tdNr.innerText = salon.Nr;
-
-            // Name (editierbar nur wenn editBaseMode)
-            const tdName = row.insertCell(1);
-            if (editBaseMode) {
-                const inp = document.createElement("input");
-                inp.type = "text"; inp.value = salon.Name; inp.className = "edit-input";
-                inp.addEventListener("change", async (e) => {
-                    salon.Name = e.target.value;
-                    await updateSalonInFirestore(salon);
-                    if (currentSortKey === "name") renderTable();
+        // --- Initial Firestore-Listener ---
+        onSnapshot(collectionRef, (snapshot) => {
+            const newList = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                newList.push({
+                    Nr: data.Nr,
+                    Name: data.Name || "",
+                    Telefon: data.Telefon || "",
+                    Bewertung: data.Bewertung ?? null,
+                    BewertetVon: data.BewertetVon || 0,
+                    priority: data.priority || "Medium",
+                    visited: data.visited || false,
+                    interested: data.interested || "no",
+                    followUp: data.followUp || "No",
+                    followUpDate: data.followUpDate || "",
+                    comments: data.comments || ""
                 });
-                tdName.appendChild(inp);
-            } else {
-                tdName.innerText = salon.Name;
-            }
-
-            // Priorität (immer editierbar)
-            const tdPrio = row.insertCell(2);
-            const prioSelect = document.createElement("select");
-            prioSelect.className = `priority-select ${salon.priority.toLowerCase()}`;
-            ["High","Medium","Low"].forEach(l => {
-                const opt = document.createElement("option");
-                opt.value = l; opt.textContent = l;
-                if (salon.priority === l) opt.selected = true;
-                prioSelect.appendChild(opt);
             });
-            prioSelect.addEventListener("change", async (e) => {
-                salon.priority = e.target.value;
-                await updateSalonInFirestore(salon);
-                if (currentSortKey === "priority") renderTable();
-                else {
-                    const row = e.target.closest("tr");
-                    if (salon.priority === "High") row.classList.add("priority-high-row");
-                    else row.classList.remove("priority-high-row");
-                    e.target.className = `priority-select ${salon.priority.toLowerCase()}`;
+            newList.sort((a,b) => a.Nr - b.Nr);
+            salons = newList;
+            renderTable();
+            if (isFirstLoad) {
+                isFirstLoad = false;
+                if (salons.length === 0) {
+                    showToast("Keine Daten – bitte Seite neu laden oder Reset-Button nutzen");
+                } else {
+                    showToast(`${salons.length} Salons geladen`);
                 }
-            });
-            tdPrio.appendChild(prioSelect);
-
-            // Besucht (Checkbox, immer)
-            const tdVis = row.insertCell(3);
-            const chk = document.createElement("input");
-            chk.type = "checkbox"; chk.className = "visited-checkbox";
-            chk.checked = salon.visited;
-            chk.addEventListener("change", async (e) => {
-                salon.visited = e.target.checked;
-                await updateSalonInFirestore(salon);
-                if (currentSortKey === "visited") renderTable();
-            });
-            tdVis.appendChild(chk);
-
-            // Interessent (immer)
-            const tdInt = row.insertCell(4);
-            const intSel = document.createElement("select");
-            intSel.className = "interested-select";
-            ["no","Buying","Leasing"].forEach(v => {
-                const opt = document.createElement("option");
-                opt.value = v; opt.textContent = v;
-                if (salon.interested === v) opt.selected = true;
-                intSel.appendChild(opt);
-            });
-            intSel.addEventListener("change", async (e) => {
-                salon.interested = e.target.value;
-                await updateSalonInFirestore(salon);
-                if (currentSortKey === "interested") renderTable();
-            });
-            tdInt.appendChild(intSel);
-
-            // Follow-up (immer)
-            const tdFol = row.insertCell(5);
-            const folSel = document.createElement("select");
-            folSel.className = "followup-select";
-            ["No","Yes"].forEach(v => {
-                const opt = document.createElement("option");
-                opt.value = v; opt.textContent = v;
-                if (salon.followUp === v) opt.selected = true;
-                folSel.appendChild(opt);
-            });
-            folSel.addEventListener("change", async (e) => {
-                salon.followUp = e.target.value;
-                await updateSalonInFirestore(salon);
-                if (currentSortKey === "followup") renderTable();
-            });
-            tdFol.appendChild(folSel);
-
-            // Termin (immer)
-            const tdDate = row.insertCell(6);
-            const dateInp = document.createElement("input");
-            dateInp.type = "date"; dateInp.className = "date-input";
-            dateInp.min = "2026-01-01"; dateInp.max = "2099-12-31";
-            if (salon.followUpDate) dateInp.value = salon.followUpDate;
-            dateInp.addEventListener("change", async (e) => {
-                salon.followUpDate = e.target.value;
-                await updateSalonInFirestore(salon);
-                if (currentSortKey === "date") renderTable();
-            });
-            tdDate.appendChild(dateInp);
-
-            // Kommentar (immer)
-            const tdCom = row.insertCell(7);
-            const comInp = document.createElement("input");
-            comInp.type = "text"; comInp.className = "comments-input";
-            comInp.placeholder = "Notiz ..."; comInp.value = salon.comments || "";
-            comInp.addEventListener("change", async (e) => {
-                salon.comments = e.target.value;
-                await updateSalonInFirestore(salon);
-            });
-            tdCom.appendChild(comInp);
-
-            // Telefon (editierbar nur bei editBaseMode)
-            const tdTel = row.insertCell(8);
-            if (editBaseMode) {
-                const inp = document.createElement("input");
-                inp.type = "tel"; inp.value = salon.Telefon; inp.className = "edit-input";
-                inp.addEventListener("change", async (e) => {
-                    salon.Telefon = e.target.value;
-                    await updateSalonInFirestore(salon);
-                });
-                tdTel.appendChild(inp);
-            } else {
-                if (salon.Telefon) {
-                    const a = document.createElement("a");
-                    a.href = `tel:${salon.Telefon.replace(/\s/g, '')}`;
-                    a.innerText = salon.Telefon; a.className = "phone-link";
-                    tdTel.appendChild(a);
-                } else tdTel.innerHTML = '<span class="empty-value">—</span>';
             }
+        });
 
-            // Bewertung (editierbar nur bei editBaseMode)
-            const tdRat = row.insertCell(9);
-            if (editBaseMode) {
-                const inp = document.createElement("input");
-                inp.type = "number"; inp.step = "0.1"; inp.min = "0"; inp.max = "5";
-                inp.value = salon.Bewertung !== null ? salon.Bewertung : "";
-                inp.placeholder = "–";
-                inp.className = "edit-number";
-                inp.addEventListener("change", async (e) => {
-                    let val = e.target.value === "" ? null : parseFloat(e.target.value);
-                    if (val !== null && (isNaN(val) || val < 0)) val = null;
-                    salon.Bewertung = val;
-                    await updateSalonInFirestore(salon);
-                    if (currentSortKey === "rating") renderTable();
-                });
-                tdRat.appendChild(inp);
-            } else {
-                if (salon.Bewertung !== null && !isNaN(salon.Bewertung)) {
-                    const cls = salon.Bewertung >= 4.7 ? "rating-high" : "";
-                    tdRat.innerHTML = `<span class="rating-badge ${cls}">⭐ ${salon.Bewertung.toFixed(1)}</span>`;
-                } else tdRat.innerHTML = '<span class="empty-value">—</span>';
-            }
-
-            // Bewertet von (editierbar nur bei editBaseMode)
-            const tdRev = row.insertCell(10);
-            if (editBaseMode) {
-                const inp = document.createElement("input");
-                inp.type = "number"; inp.step = "1"; inp.min = "0";
-                inp.value = salon.BewertetVon;
-                inp.className = "edit-number";
-                inp.addEventListener("change", async (e) => {
-                    let val = parseInt(e.target.value, 10);
-                    if (isNaN(val)) val = 0;
-                    salon.BewertetVon = val;
-                    await updateSalonInFirestore(salon);
-                    if (currentSortKey === "reviews") renderTable();
-                });
-                tdRev.appendChild(inp);
-            } else {
-                tdRev.innerText = salon.BewertetVon > 0 ? salon.BewertetVon : "—";
-            }
-        }
-    }
-
-    function getComparator(key) {
-        return (a,b) => {
-            if (key === "nr") return a.Nr - b.Nr;
-            if (key === "name") return a.Name.localeCompare(b.Name);
-            if (key === "priority") {
-                const order = { High:3, Medium:2, Low:1 };
-                return (order[b.priority]||0) - (order[a.priority]||0);
-            }
-            if (key === "visited") return (b.visited?1:0) - (a.visited?1:0);
-            if (key === "interested") {
-                const map = { Buying:3, Leasing:2, no:1 };
-                return (map[b.interested]||0) - (map[a.interested]||0);
-            }
-            if (key === "followup") return (b.followUp==="Yes"?1:0) - (a.followUp==="Yes"?1:0);
-            if (key === "date") {
-                let da = a.followUpDate ? new Date(a.followUpDate).getTime() : 0;
-                let db = b.followUpDate ? new Date(b.followUpDate).getTime() : 0;
-                return db - da;
-            }
-            if (key === "rating") {
-                let ra = a.Bewertung ?? -1, rb = b.Bewertung ?? -1;
-                if (ra === rb) return (b.BewertetVon||0) - (a.BewertetVon||0);
-                return rb - ra;
-            }
-            if (key === "reviews") return (b.BewertetVon||0) - (a.BewertetVon||0);
-            return 0;
-        };
-    }
-
-    function setSort(key) {
-        currentSortKey = key;
-        renderTable();
-        document.getElementById("sortSelect").value = key;
-    }
-
-    async function addNewSalon() {
-        let maxNr = 0;
-        for (let s of salons) if (s.Nr > maxNr) maxNr = s.Nr;
-        const newNr = maxNr + 1;
-        const newSalon = {
-            Nr: newNr,
-            Name: "Neuer Friseur",
-            Telefon: "",
-            Bewertung: null,
-            BewertetVon: 0,
-            priority: "Medium",
-            visited: false,
-            interested: "no",
-            followUp: "No",
-            followUpDate: "",
-            comments: ""
-        };
-        const docRef = doc(db, "friseure_final_v2", newNr.toString());
-        await setDoc(docRef, newSalon);
-        showToast(`➕ Friseur #${newNr} hinzugefügt`);
-    }
-
-    function toggleBaseEdit() {
-        editBaseMode = !editBaseMode;
-        const btn = document.getElementById("toggleBaseEditBtn");
-        if (editBaseMode) {
-            btn.innerHTML = "🔓 Basisdaten editieren (EIN)";
-            btn.classList.add("active");
-        } else {
-            btn.innerHTML = "✏️ Basisdaten editieren (AUS)";
-            btn.classList.remove("active");
-        }
-        renderTable();
-    }
-
-    function toggleDarkMode() {
-        const body = document.body;
-        if (body.classList.contains("light-mode")) {
-            body.classList.remove("light-mode");
-            body.classList.add("dark-mode");
-            document.getElementById("darkModeBtn").innerHTML = "☀️ Light Mode";
-        } else {
-            body.classList.remove("dark-mode");
-            body.classList.add("light-mode");
-            document.getElementById("darkModeBtn").innerHTML = "🌙 Dark Mode";
-        }
-    }
-
-    function bindUI() {
+        // --- UI Bindings ---
         document.querySelectorAll("#tableHeader th[data-sort]").forEach(th => {
             th.addEventListener("click", () => setSort(th.getAttribute("data-sort")));
         });
@@ -683,44 +993,11 @@
         document.getElementById("addBtn").addEventListener("click", addNewSalon);
         document.getElementById("toggleBaseEditBtn").addEventListener("click", toggleBaseEdit);
         document.getElementById("darkModeBtn").addEventListener("click", toggleDarkMode);
-        document.getElementById("resetCloudBtn").addEventListener("click", async () => {
-            if (confirm("Cloud komplett zurücksetzen? Alle eigenen Änderungen gehen verloren, 116 Standard-Friseure werden neu geladen.")) {
-                await resetCloudAndReload();
-            }
-        });
-    }
 
-    // Start: Firestore Live-Listener
-    onSnapshot(collectionRef, (snapshot) => {
-        const newList = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            newList.push({
-                Nr: data.Nr,
-                Name: data.Name || "",
-                Telefon: data.Telefon || "",
-                Bewertung: data.Bewertung ?? null,
-                BewertetVon: data.BewertetVon || 0,
-                priority: data.priority || "Medium",
-                visited: data.visited || false,
-                interested: data.interested || "no",
-                followUp: data.followUp || "No",
-                followUpDate: data.followUpDate || "",
-                comments: data.comments || ""
-            });
-        });
-        newList.sort((a,b) => a.Nr - b.Nr);
-        salons = newList;
-        renderTable();
-        if (salons.length === 0) {
-            showToast("⚠️ Keine Daten in Cloud – bitte „Cloud zurücksetzen“ drücken");
-        } else {
-            showToast(`☁️ ${salons.length} Salons geladen`);
+        // Initialen Darkmode-Status setzen
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            toggleDarkMode();
         }
-    });
-
-    bindUI();
-    // Optional: Beim Start prüfen, ob Daten vorhanden sind (kein automatischer Reset, weil User selbst entscheiden soll)
-</script>
+    </script>
 </body>
 </html>
